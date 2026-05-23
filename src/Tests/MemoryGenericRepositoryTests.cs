@@ -1,6 +1,7 @@
 using CoreApp.Domain.Entities;
 using CoreApp.Application.Repositories;
 using Infrastructure.Memory;
+using Xunit;
 
 namespace Tests;
 
