@@ -1,10 +1,13 @@
 using CoreApp.Application.Repositories;
 using CoreApp.Application.Services;
 using CoreApp.Application.UnitOfWork;
+using CoreApp.Module;
 using Infrastructure.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAuthorization();
+builder.Services.AddStudentsModule(builder.Configuration);
 builder.Services.AddControllers();
 
 builder.Services.AddSingleton<IStudentRepository, MemoryStudentRepository>();
