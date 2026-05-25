@@ -25,13 +25,13 @@ public class MemoryStudentService(IUniversityUnitOfWork unitOfWork) : IStudentSe
             students.PageSize);
     }
 
-    public async Task<StudentDetailDto?> FindStudentByIdAsync(Guid id)
+    public async Task<StudentDetailDto?> GetById(Guid id)
     {
         var student = await unitOfWork.Students.FindByIdAsync(id);
         return student is null ? null : StudentDetailDto.FromEntity(student);
     }
 
-    public async Task<StudentDetailDto> CreateStudentAsync(StudentCreateDto dto)
+    public async Task<StudentDetailDto> AddStudent(StudentCreateDto dto)
     {
         var student = StudentCreateDto.ToEntity(dto);
 
@@ -41,7 +41,7 @@ public class MemoryStudentService(IUniversityUnitOfWork unitOfWork) : IStudentSe
         return StudentDetailDto.FromEntity(student);
     }
 
-    public async Task<StudentDetailDto?> UpdateStudentAsync(Guid id, StudentUpdateDto dto)
+    public async Task<StudentSummaryDto?> UpdateStudent(Guid id, StudentUpdateDto dto)
     {
         var student = await unitOfWork.Students.FindByIdAsync(id);
         if (student is null)
@@ -54,7 +54,7 @@ public class MemoryStudentService(IUniversityUnitOfWork unitOfWork) : IStudentSe
         await unitOfWork.Students.UpdateAsync(student);
         await unitOfWork.SaveChangesAsync();
 
-        return StudentDetailDto.FromEntity(student);
+        return StudentSummaryDto.FromEntity(student);
     }
 
     public async Task<StudentDetailDto?> ChangeStudentStatusAsync(Guid id, StudentStatus status)

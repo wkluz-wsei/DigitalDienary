@@ -15,23 +15,23 @@ public class StudentsController(IStudentService service) : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetStudentById(Guid id)
+    public async Task<IActionResult> GetStudent(Guid id)
     {
-        var student = await service.FindStudentByIdAsync(id);
-        return student is null ? NotFound() : Ok(student);
+        var dto = await service.GetById(id);
+        return dto is null ? NotFound() : Ok(dto);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateStudent(StudentCreateDto dto)
+    public async Task<IActionResult> Create(StudentCreateDto dto)
     {
-        var student = await service.CreateStudentAsync(dto);
-        return CreatedAtAction(nameof(GetStudentById), new { id = student.Id }, student);
+        var result = await service.AddStudent(dto);
+        return CreatedAtAction(nameof(GetStudent), new { id = result.Id }, result);
     }
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateStudent(Guid id, StudentUpdateDto dto)
     {
-        var student = await service.UpdateStudentAsync(id, dto);
+        var student = await service.UpdateStudent(id, dto);
         return student is null ? NotFound() : Ok(student);
     }
 

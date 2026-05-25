@@ -1,0 +1,47 @@
+@WebApi_HostAddress = http://localhost:5000
+@Student_GUID = 5f32d363-8c48-43e3-8760-3ca12e14da69
+GET {{WebApi_HostAddress}}/api/students
+Accept: application/json
+
+###
+GET {{WebApi_HostAddress}}/api/students/{{Student_GUID}}
+Accept: application/json
+
+###
+POST {{WebApi_HostAddress}}/api/students
+Content-Type: application/json
+
+{
+  "firstName": "Adam",
+  "lastName": "Nowak",
+  "nationalId": "99010112345",
+  "email": "adam@wsei.edu.pl",
+  "studentId": "S100",
+  "programName": "Informatyka",
+  "yearOfStudy": 2,
+  "status": 0
+}
+
+###
+PUT {{WebApi_HostAddress}}/api/students/{{Student_GUID}}
+Content-Type: application/json
+
+{
+  "firstName": "Adam",
+  "lastName": "Nowak-Zmieniony",
+  "nationalId": "99010112345",
+  "email": "adam.nowy@wsei.edu.pl",
+  "studentId": "S100",
+  "programName": "Informatyka",
+  "yearOfStudy": 3,
+  "status": 0
+}
+
+###
+POST {{WebApi_HostAddress}}/api/students
+Content-Type: application/json
+
+{
+  "firstName": "Adam",
+  "lastName": "Nowak"
+}
