@@ -49,14 +49,7 @@ public class MemoryStudentService(IUniversityUnitOfWork unitOfWork) : IStudentSe
             return null;
         }
 
-        student.FirstName = dto.FirstName;
-        student.LastName = dto.LastName;
-        student.NationalId = dto.NationalId;
-        student.Email = dto.Email;
-        student.StudentId = dto.StudentId;
-        student.ProgramName = dto.ProgramName;
-        student.YearOfStudy = dto.YearOfStudy;
-        student.Status = dto.Status;
+        dto.UpdateEntity(student);
 
         await unitOfWork.Students.UpdateAsync(student);
         await unitOfWork.SaveChangesAsync();
