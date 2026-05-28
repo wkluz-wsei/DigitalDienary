@@ -1,0 +1,37 @@
+using CoreApp.Application.Security;
+using Microsoft.AspNetCore.Identity;
+
+namespace Infrastructure.EntityFramework.Entities;
+
+public class AppUser : IdentityUser, ISystemUser
+{
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
+    public required string FullName { get; set; }
+    public required string Department { get; set; }
+    public required SystemUserStatus Status { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? LastLoginAt { get; set; }
+    public DateTime? DeactivatedAt { get; private set; }
+
+    string ISystemUser.Id => Id;
+    string ISystemUser.Email => Email ?? string.Empty;
+
+    public void Activate()
+    {
+        if (Status == SystemUserStatus.Inactive)
+        {
+            Status = SystemUserStatus.Active;
+            DeactivatedAt = null;
+        }
+    }
+
+    public void Deactivate(DateTime now)
+    {
+        if (Status == SystemUserStatus.Active)
+        {
+            Status = SystemUserStatus.Inactive;
+            DeactivatedAt = now;
+        }
+    }
+}
