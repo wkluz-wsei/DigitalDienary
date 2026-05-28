@@ -1,3 +1,4 @@
+using CoreApp.Application.Dto.Grades;
 using CoreApp.Application.Dto.Students;
 using CoreApp.Application.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -15,23 +16,23 @@ public class StudentsController(IStudentService service) : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetStudentById(Guid id)
+    public async Task<IActionResult> GetStudent(Guid id)
     {
-        var student = await service.FindStudentByIdAsync(id);
-        return student is null ? NotFound() : Ok(student);
+        var dto = await service.GetById(id);
+        return dto is null ? NotFound() : Ok(dto);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateStudent(StudentCreateDto dto)
+    public async Task<IActionResult> Create(StudentCreateDto dto)
     {
-        var student = await service.CreateStudentAsync(dto);
-        return CreatedAtAction(nameof(GetStudentById), new { id = student.Id }, student);
+        var result = await service.AddStudent(dto);
+        return CreatedAtAction(nameof(GetStudent), new { id = result.Id }, result);
     }
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateStudent(Guid id, StudentUpdateDto dto)
     {
-        var student = await service.UpdateStudentAsync(id, dto);
+        var student = await service.UpdateStudent(id, dto);
         return student is null ? NotFound() : Ok(student);
     }
 
@@ -40,5 +41,34 @@ public class StudentsController(IStudentService service) : ControllerBase
     {
         var student = await service.ChangeStudentStatusAsync(id, dto.Status);
         return student is null ? NotFound() : Ok(student);
+    }
+
+    [HttpPost("{studentId:guid}/grades")]
+    [ProducesResponseType(typeof(GradeDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AddGrade([FromRoute] Guid studentId, [FromBody] GradeDto dto)
+    {
+        var grade = await service.AddGrade(studentId, dto);
+        return CreatedAtAction(nameof(GetGrades), new { studentId }, grade);
+    }
+
+    [HttpGet("{studentId:guid}/grades")]
+    [ProducesResponseType(typeof(IEnumerable<GradeDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetGrades([FromRoute] Guid studentId)
+    {
+        var grades = await service.GetGrades(studentId);
+        return Ok(grades);
+    }
+
+    [HttpPut("{studentId:guid}/grades/{gradeId:guid}")]
+    [ProducesResponseType(typeof(GradeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateGrade([FromRoute] Guid studentId, [FromRoute] Guid gradeId, [FromBody] GradeUpdateDto dto)
+    {
+        var grade = await service.UpdateGrade(studentId, gradeId, dto);
+        return Ok(grade);
     }
 }

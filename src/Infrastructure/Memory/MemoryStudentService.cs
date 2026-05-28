@@ -1,7 +1,10 @@
+using CoreApp.Application.Dto.Grades;
 using CoreApp.Application.Dto.Students;
+using CoreApp.Application.Exceptions;
 using CoreApp.Application.Paging;
 using CoreApp.Application.Services;
 using CoreApp.Application.UnitOfWork;
+using CoreApp.Domain.Entities;
 using CoreApp.Domain.Enums;
 
 namespace Infrastructure.Memory;
@@ -25,13 +28,13 @@ public class MemoryStudentService(IUniversityUnitOfWork unitOfWork) : IStudentSe
             students.PageSize);
     }
 
-    public async Task<StudentDetailDto?> FindStudentByIdAsync(Guid id)
+    public async Task<StudentDetailDto?> GetById(Guid id)
     {
         var student = await unitOfWork.Students.FindByIdAsync(id);
         return student is null ? null : StudentDetailDto.FromEntity(student);
     }
 
-    public async Task<StudentDetailDto> CreateStudentAsync(StudentCreateDto dto)
+    public async Task<StudentDetailDto> AddStudent(StudentCreateDto dto)
     {
         var student = StudentCreateDto.ToEntity(dto);
 
@@ -41,7 +44,7 @@ public class MemoryStudentService(IUniversityUnitOfWork unitOfWork) : IStudentSe
         return StudentDetailDto.FromEntity(student);
     }
 
-    public async Task<StudentDetailDto?> UpdateStudentAsync(Guid id, StudentUpdateDto dto)
+    public async Task<StudentSummaryDto?> UpdateStudent(Guid id, StudentUpdateDto dto)
     {
         var student = await unitOfWork.Students.FindByIdAsync(id);
         if (student is null)
@@ -49,19 +52,72 @@ public class MemoryStudentService(IUniversityUnitOfWork unitOfWork) : IStudentSe
             return null;
         }
 
-        student.FirstName = dto.FirstName;
-        student.LastName = dto.LastName;
-        student.NationalId = dto.NationalId;
-        student.Email = dto.Email;
-        student.StudentId = dto.StudentId;
-        student.ProgramName = dto.ProgramName;
-        student.YearOfStudy = dto.YearOfStudy;
-        student.Status = dto.Status;
+        dto.UpdateEntity(student);
 
         await unitOfWork.Students.UpdateAsync(student);
         await unitOfWork.SaveChangesAsync();
 
-        return StudentDetailDto.FromEntity(student);
+        return StudentSummaryDto.FromEntity(student);
+    }
+
+    public async Task<GradeDto> AddGrade(Guid studentId, GradeDto dto)
+    {
+        var student = await unitOfWork.Students.FindByIdAsync(studentId)
+            ?? throw new StudentNotFoundException($"Student with id={studentId} not found!");
+
+        var course = await unitOfWork.Courses.FindByIdAsync(dto.CourseId)
+            ?? throw new CourseNotFoundException($"Course with id={dto.CourseId} not found!");
+
+        var lecturer = await unitOfWork.Lecturers.FindByIdAsync(dto.LecturerId)
+            ?? throw new LecturerNotFoundException($"Lecturer with id={dto.LecturerId} not found!");
+
+        var academicYear = await unitOfWork.AcademicYears.FindByIdAsync(dto.AcademicYearId)
+            ?? throw new AcademicYearNotFoundException($"Academic year with id={dto.AcademicYearId} not found!");
+
+        var grade = new Grade
+        {
+            Student = student,
+            Course = course,
+            Instructor = lecturer,
+            AcademicYear = academicYear,
+            Date = dto.Date,
+            GradeType = dto.GradeType,
+            GradeValue = GradeValueMapper.ToEnum(dto.GradeValue)
+        };
+
+        student.Grades.Add(grade);
+        await unitOfWork.Grades.AddAsync(grade);
+        await unitOfWork.Students.UpdateAsync(student);
+        await unitOfWork.SaveChangesAsync();
+
+        return GradeDto.FromEntity(grade);
+    }
+
+    public async Task<IEnumerable<GradeDto>> GetGrades(Guid studentId)
+    {
+        var student = await unitOfWork.Students.FindByIdAsync(studentId)
+            ?? throw new StudentNotFoundException($"Student with id={studentId} not found!");
+
+        return student.Grades
+            .Select(GradeDto.FromEntity)
+            .ToList();
+    }
+
+    public async Task<GradeDto> UpdateGrade(Guid studentId, Guid gradeId, GradeUpdateDto dto)
+    {
+        var student = await unitOfWork.Students.FindByIdAsync(studentId)
+            ?? throw new StudentNotFoundException($"Student with id={studentId} not found!");
+
+        var grade = student.Grades.FirstOrDefault(g => g.Id == gradeId)
+            ?? throw new GradeNotFoundException($"Grade with id={gradeId} not found for student with id={studentId}!");
+
+        dto.UpdateEntity(grade);
+
+        await unitOfWork.Grades.UpdateAsync(grade);
+        await unitOfWork.Students.UpdateAsync(student);
+        await unitOfWork.SaveChangesAsync();
+
+        return GradeDto.FromEntity(grade);
     }
 
     public async Task<StudentDetailDto?> ChangeStudentStatusAsync(Guid id, StudentStatus status)
