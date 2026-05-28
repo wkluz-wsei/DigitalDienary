@@ -1,24 +1,36 @@
-using CoreApp.Application.Repositories;
-using CoreApp.Application.Services;
-using CoreApp.Application.UnitOfWork;
 using CoreApp.Module;
-using Infrastructure.Memory;
+using Infrastructure;
+using Infrastructure.Security;
+using WebApi.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAuthorization();
-builder.Services.AddStudentsModule(builder.Configuration);
+builder.Services.AddSingleton<JwtSettings>();
+builder.Services.AddJwt(new JwtSettings(builder.Configuration));
+builder.Services.AddUniversityEfModule(builder.Configuration);
+builder.Services.AddUniversityCoreModule(builder.Configuration);
+builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
+builder.Services.AddProblemDetails();
 builder.Services.AddControllers();
-
-builder.Services.AddSingleton<IStudentRepository, MemoryStudentRepository>();
-builder.Services.AddSingleton<ILecturerRepository, MemoryLecturerRepository>();
-builder.Services.AddSingleton<IGradeRepository, MemoryGradeRepository>();
-builder.Services.AddSingleton<IUniversityUnitOfWork, MemoryUniversityUnitOfWork>();
-builder.Services.AddSingleton<IStudentService, MemoryStudentService>();
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var seeders = scope.ServiceProvider
+        .GetServices<IDataSeeder>()
+        .OrderBy(s => s.Order);
+
+    foreach (var seeder in seeders)
+    {
+        await seeder.SeedAsync();
+    }
+}
+
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

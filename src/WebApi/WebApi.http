@@ -1,5 +1,9 @@
-@WebApi_HostAddress = http://localhost:5000
-@Student_GUID = 5f32d363-8c48-43e3-8760-3ca12e14da69
+@WebApi_HostAddress = http://localhost:5148
+@Student_GUID = 3d54091d-abc8-49ec-9590-93ad3ed5458f
+@Course_GUID = 8e8f8f66-bb84-4f77-8a42-6052b8c64410
+@Lecturer_GUID = 0d7c4923-0ed0-4db9-a392-4b3c520ef77e
+@AcademicYear_GUID = 8e7a123e-b9b1-42d5-8bdd-c3cd7d7e96fb
+
 GET {{WebApi_HostAddress}}/api/students
 Accept: application/json
 
@@ -38,10 +42,41 @@ Content-Type: application/json
 }
 
 ###
-POST {{WebApi_HostAddress}}/api/students
+POST {{WebApi_HostAddress}}/api/students/{{Student_GUID}}/grades
 Content-Type: application/json
 
 {
-  "firstName": "Adam",
-  "lastName": "Nowak"
+  "courseId": "{{Course_GUID}}",
+  "lecturerId": "{{Lecturer_GUID}}",
+  "academicYearId": "{{AcademicYear_GUID}}",
+  "date": "2026-05-09T00:00:00Z",
+  "gradeType": 1,
+  "gradeValue": 4.5
+}
+
+###
+GET {{WebApi_HostAddress}}/api/students/{{Student_GUID}}/grades
+Accept: application/json
+
+###
+PUT {{WebApi_HostAddress}}/api/students/{{Student_GUID}}/grades/<grade-guid>
+Content-Type: application/json
+
+{
+  "date": "2026-05-10T00:00:00Z",
+  "gradeType": 2,
+  "gradeValue": 5.0
+}
+
+###
+POST {{WebApi_HostAddress}}/api/students/00000000-0000-0000-0000-000000000000/grades
+Content-Type: application/json
+
+{
+  "courseId": "{{Course_GUID}}",
+  "lecturerId": "{{Lecturer_GUID}}",
+  "academicYearId": "{{AcademicYear_GUID}}",
+  "date": "2026-05-09T00:00:00Z",
+  "gradeType": 0,
+  "gradeValue": 4.0
 }
