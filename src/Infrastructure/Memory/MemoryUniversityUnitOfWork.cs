@@ -6,10 +6,14 @@ namespace Infrastructure.Memory;
 public class MemoryUniversityUnitOfWork(
     IStudentRepository students,
     ILecturerRepository lecturers,
+    ICourseRepository courses,
+    IAcademicYearRepository academicYears,
     IGradeRepository grades) : IUniversityUnitOfWork
 {
     public IStudentRepository Students => students;
     public ILecturerRepository Lecturers => lecturers;
+    public ICourseRepository Courses => courses;
+    public IAcademicYearRepository AcademicYears => academicYears;
     public IGradeRepository Grades => grades;
 
     public ValueTask DisposeAsync()

@@ -6,10 +6,14 @@ namespace Infrastructure.Memory;
 
 public class MemoryStudentRepository : MemoryGenericRepository<Student>, IStudentRepository
 {
+    public static readonly Guid FirstStudentId = Guid.Parse("3d54091d-abc8-49ec-9590-93ad3ed5458f");
+    public static readonly Guid SecondStudentId = Guid.Parse("7ba19ea5-3967-4b24-bb87-b14c9ee14770");
+
     public MemoryStudentRepository()
     {
         var firstStudent = new Student
         {
+            Id = FirstStudentId,
             FirstName = "Adam",
             LastName = "Nowak",
             NationalId = "99010112345",
@@ -22,6 +26,7 @@ public class MemoryStudentRepository : MemoryGenericRepository<Student>, IStuden
 
         var secondStudent = new Student
         {
+            Id = SecondStudentId,
             FirstName = "Ewa",
             LastName = "Kowalska",
             NationalId = "98020254321",
