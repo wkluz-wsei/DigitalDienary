@@ -43,6 +43,7 @@ public class UniversityDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<Lecturer> Lecturers => Set<Lecturer>();
     public DbSet<AcademicYear> AcademicYears => Set<AcademicYear>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<GradeHistory> GradeHistories => Set<GradeHistory>();
 
     public UniversityDbContext()
     {
