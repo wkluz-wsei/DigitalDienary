@@ -11,8 +11,15 @@ namespace WebApi.Controller;
 [Authorize(Policy = nameof(AppPolicies.LecturerOrAdmin))]
 public class LecturerController(ILecturerService lecturerService) : ControllerBase
 {
-    /// <summary>Lista studentów zapisanych na kurs danego prowadzącego.</summary>
-    [HttpGet("courses/{courseId}/students")]
+    [HttpGet("students")]
+    [ProducesResponseType(typeof(IEnumerable<StudentSummaryDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetStudents()
+    {
+        var students = await lecturerService.GetStudentsAsync();
+        return Ok(students);
+    }
+
+    [HttpGet("courses/{courseId:guid}/students")]
     [ProducesResponseType(typeof(IEnumerable<StudentSummaryDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStudentsForCourse(Guid courseId)
     {

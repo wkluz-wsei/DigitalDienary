@@ -1,6 +1,7 @@
 using CoreApp.Module;
 using Infrastructure;
 using Infrastructure.Security;
+using Scalar.AspNetCore;
 using WebApi.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +42,12 @@ if (app.Environment.IsDevelopment())
 
     app.MapOpenApi()
         .AllowAnonymous();
+
+    app.MapScalarApiReference("/swagger", options =>
+    {
+        options.WithTitle("Digital Deanary API");
+    })
+    .AllowAnonymous();
 }
 
 app.MapControllers();
