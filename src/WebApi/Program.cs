@@ -6,14 +6,26 @@ using WebApi.Exceptions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<JwtSettings>();
+
 builder.Services.AddJwt(new JwtSettings(builder.Configuration));
+
 builder.Services.AddUniversityEfModule(builder.Configuration);
 builder.Services.AddUniversityCoreModule(builder.Configuration);
+
 builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
 builder.Services.AddProblemDetails();
+
 builder.Services.AddControllers();
 
+builder.Services.AddOpenApi();
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
+
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
@@ -26,12 +38,11 @@ if (app.Environment.IsDevelopment())
     {
         await seeder.SeedAsync();
     }
+
+    app.MapOpenApi()
+        .AllowAnonymous();
 }
 
-app.UseExceptionHandler();
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

@@ -1,21 +1,26 @@
+using CoreApp.Application.Authorization;
 using CoreApp.Application.Dto.Grades;
 using CoreApp.Application.Dto.Students;
 using CoreApp.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controller;
 
 [ApiController]
 [Route("/api/students")]
+[Authorize]
 public class StudentsController(IStudentService service) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Policy = nameof(AppPolicies.LecturerOrAdmin))]
     public async Task<IActionResult> GetAllStudents([FromQuery] int page = 1, [FromQuery] int size = 10)
     {
         return Ok(await service.FindAllStudentsPaged(page, size));
     }
 
     [HttpGet("{id:guid}")]
+    [Authorize(Policy = nameof(AppPolicies.LecturerOrAdmin))]
     public async Task<IActionResult> GetStudent(Guid id)
     {
         var dto = await service.GetById(id);
@@ -23,6 +28,7 @@ public class StudentsController(IStudentService service) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = nameof(AppPolicies.DeanOfficeOnly))]
     public async Task<IActionResult> Create(StudentCreateDto dto)
     {
         var result = await service.AddStudent(dto);
@@ -30,6 +36,7 @@ public class StudentsController(IStudentService service) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Policy = nameof(AppPolicies.DeanOfficeOnly))]
     public async Task<IActionResult> UpdateStudent(Guid id, StudentUpdateDto dto)
     {
         var student = await service.UpdateStudent(id, dto);
@@ -37,6 +44,7 @@ public class StudentsController(IStudentService service) : ControllerBase
     }
 
     [HttpPatch("{id:guid}/status")]
+    [Authorize(Policy = nameof(AppPolicies.DeanOfficeOnly))]
     public async Task<IActionResult> ChangeStudentStatus(Guid id, StudentStatusUpdateDto dto)
     {
         var student = await service.ChangeStudentStatusAsync(id, dto.Status);
@@ -44,6 +52,7 @@ public class StudentsController(IStudentService service) : ControllerBase
     }
 
     [HttpPost("{studentId:guid}/grades")]
+    [Authorize(Policy = nameof(AppPolicies.LecturerOrAdmin))]
     [ProducesResponseType(typeof(GradeDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -54,6 +63,7 @@ public class StudentsController(IStudentService service) : ControllerBase
     }
 
     [HttpGet("{studentId:guid}/grades")]
+    [Authorize(Policy = nameof(AppPolicies.LecturerOrAdmin))]
     [ProducesResponseType(typeof(IEnumerable<GradeDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetGrades([FromRoute] Guid studentId)
@@ -63,6 +73,7 @@ public class StudentsController(IStudentService service) : ControllerBase
     }
 
     [HttpPut("{studentId:guid}/grades/{gradeId:guid}")]
+    [Authorize(Policy = nameof(AppPolicies.LecturerOrAdmin))]
     [ProducesResponseType(typeof(GradeDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

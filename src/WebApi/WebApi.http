@@ -1,4 +1,4 @@
-@WebApi_HostAddress = http://localhost:5148
+@WebApi_HostAddress = http://localhost:5000
 @Student_GUID = 3d54091d-abc8-49ec-9590-93ad3ed5458f
 @Course_GUID = 8e8f8f66-bb84-4f77-8a42-6052b8c64410
 @Lecturer_GUID = 0d7c4923-0ed0-4db9-a392-4b3c520ef77e
@@ -80,3 +80,6 @@ Content-Type: application/json
   "gradeType": 0,
   "gradeValue": 4.0
 }
+
+###
+GET http://localhost:5000/openapi/v1.json
