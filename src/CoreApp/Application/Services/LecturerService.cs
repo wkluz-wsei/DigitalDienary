@@ -1,6 +1,7 @@
 using CoreApp.Application.Dto.Students;
 using CoreApp.Application.Security;
 using CoreApp.Application.UnitOfWork;
+using CoreApp.Domain.Enums;
 
 namespace CoreApp.Application.Services;
 
@@ -8,23 +9,48 @@ public class LecturerService(
     IUniversityUnitOfWork unitOfWork,
     ICurrentUserContext currentUserContext) : ILecturerService
 {
-    public async Task<IEnumerable<StudentSummaryDto>> GetStudentsForCourseAsync(Guid courseId)
+    public async Task<IEnumerable<StudentSummaryDto>> GetStudentsAsync()
     {
-        var userId = currentUserContext.UserId;
-        if (userId == null) throw new UnauthorizedAccessException();
-        
-        var lecturer = await unitOfWork.Lecturers.FindAllAsync()
-            .ContinueWith(t => t.Result.FirstOrDefault(l => l.Email == currentUserContext.UserName));
+        var userName = currentUserContext.UserName
+            ?? throw new UnauthorizedAccessException("Authenticated user email is required.");
 
-        if (lecturer == null && !currentUserContext.IsInRole(UserRole.Administrator.ToString()) && !currentUserContext.IsInRole(UserRole.DeanOfficeStaff.ToString()))
+        if (IsDeanOfficeOrAdministrator())
         {
-             throw new UnauthorizedAccessException("Only lecturers or staff can access student lists.");
+            var students = await unitOfWork.Students.FindAllAsync();
+            return students.Select(StudentSummaryDto.FromEntity).ToList();
         }
 
-        var course = await unitOfWork.Courses.FindByIdAsync(courseId);
-        if (course == null) return Enumerable.Empty<StudentSummaryDto>();
+        var courses = await unitOfWork.Courses.FindByLecturerEmailWithEnrollmentsAsync(userName);
+        return courses
+            .SelectMany(c => c.Enrollments)
+            .GroupBy(s => s.Id)
+            .Select(g => StudentSummaryDto.FromEntity(g.First()))
+            .ToList();
+    }
 
+    public async Task<IEnumerable<StudentSummaryDto>> GetStudentsForCourseAsync(Guid courseId)
+    {
+        if (!IsDeanOfficeOrAdministrator())
+        {
+            var userName = currentUserContext.UserName
+                ?? throw new UnauthorizedAccessException("Authenticated user email is required.");
 
-        return course.Enrollments.Select(StudentSummaryDto.FromEntity);
+            if (!await unitOfWork.Courses.IsTaughtByLecturerEmailAsync(courseId, userName))
+                throw new UnauthorizedAccessException("Only the course lecturer can access this student list.");
+        }
+
+        var course = await unitOfWork.Courses.FindByIdWithEnrollmentsAsync(courseId);
+        if (course is null)
+            return Enumerable.Empty<StudentSummaryDto>();
+
+        return course.Enrollments
+            .Select(StudentSummaryDto.FromEntity)
+            .ToList();
+    }
+
+    private bool IsDeanOfficeOrAdministrator()
+    {
+        return currentUserContext.IsInRole(UserRole.DeanOfficeStaff.ToString())
+            || currentUserContext.IsInRole(UserRole.Administrator.ToString());
     }
 }
