@@ -1,5 +1,6 @@
 using CoreApp.Domain.Entities;
 using CoreApp.Domain.Enums;
+using CoreApp.Domain.ValueObjects;
 
 namespace CoreApp.Application.Dto.Students;
 
@@ -16,7 +17,7 @@ public sealed record StudentCreateDto : PersonCreateDto
         {
             FirstName = student.FirstName,
             LastName = student.LastName,
-            NationalId = student.NationalId,
+            NationalId = new PESEL(student.NationalId),
             Email = student.Email,
             StudentId = student.StudentId,
             ProgramName = student.ProgramName,

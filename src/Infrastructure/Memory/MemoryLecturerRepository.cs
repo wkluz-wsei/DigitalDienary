@@ -1,5 +1,6 @@
 using CoreApp.Application.Repositories;
 using CoreApp.Domain.Entities;
+using CoreApp.Domain.ValueObjects;
 
 namespace Infrastructure.Memory;
 
@@ -15,7 +16,7 @@ public class MemoryLecturerRepository : MemoryGenericRepository<Lecturer>, ILect
             Id = LecturerNowakId,
             FirstName = "Jan",
             LastName = "Nowak",
-            NationalId = "75010112345",
+            NationalId = new PESEL("75010112346"),
             Email = "jan.nowak@wsei.edu.pl",
             Title = "dr inż.",
             Faculty = "Informatyka"
@@ -26,7 +27,7 @@ public class MemoryLecturerRepository : MemoryGenericRepository<Lecturer>, ILect
             Id = LecturerKowalskaId,
             FirstName = "Anna",
             LastName = "Kowalska",
-            NationalId = "78020254321",
+            NationalId = new PESEL("78020254325"),
             Email = "anna.kowalska@wsei.edu.pl",
             Title = "mgr",
             Faculty = "Matematyka"

@@ -1,6 +1,7 @@
 using CoreApp.Application.Repositories;
 using CoreApp.Domain.Entities;
 using CoreApp.Domain.Enums;
+using CoreApp.Domain.ValueObjects;
 
 namespace Infrastructure.Memory;
 
@@ -13,7 +14,7 @@ public class MemoryGradeRepository : MemoryGenericRepository<Grade>, IGradeRepos
             Id = MemoryStudentRepository.FirstStudentId,
             FirstName = "Adam",
             LastName = "Nowak",
-            NationalId = "99010112345",
+            NationalId = new PESEL("99010112342"),
             Email = "adam.nowak@example.com",
             StudentId = "S001",
             ProgramName = "Informatyka",
@@ -44,7 +45,7 @@ public class MemoryGradeRepository : MemoryGenericRepository<Grade>, IGradeRepos
                 Id = MemoryLecturerRepository.LecturerNowakId,
                 FirstName = "Jan",
                 LastName = "Nowak",
-                NationalId = "75010112345",
+                NationalId = new PESEL("75010112346"),
                 Email = "jan.nowak@wsei.edu.pl",
                 Title = "dr inż.",
                 Faculty = "Informatyka"

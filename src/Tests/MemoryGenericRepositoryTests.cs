@@ -1,5 +1,6 @@
 using CoreApp.Domain.Entities;
 using CoreApp.Application.Repositories;
+using CoreApp.Domain.ValueObjects;
 using Infrastructure.Memory;
 using Xunit;
 
@@ -15,6 +16,7 @@ public class MemoryGenericRepositoryTests
     {
         var student = new Student
         {
+            NationalId = new PESEL("99010112342"),
             FirstName = "Adam",
             LastName = "Nowak",
             Email = "adam@test.com",

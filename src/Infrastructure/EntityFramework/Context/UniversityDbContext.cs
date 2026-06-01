@@ -1,6 +1,7 @@
 using CoreApp.Application.Security;
 using CoreApp.Domain.Entities;
 using CoreApp.Domain.Enums;
+using CoreApp.Domain.ValueObjects;
 using Infrastructure.EntityFramework.Entities;
 using Infrastructure.Security;
 using Microsoft.AspNetCore.Identity;
@@ -85,7 +86,11 @@ public class UniversityDbContext : IdentityDbContext<AppUser, AppRole, string>
         {
             entity.Property(s => s.FirstName).HasMaxLength(100);
             entity.Property(s => s.LastName).HasMaxLength(100);
-            entity.Property(s => s.NationalId).HasMaxLength(11);
+            entity.Property(s => s.NationalId)
+                .HasConversion(
+                    v => v != null ? v.Value : null,
+                    v => v != null ? new PESEL(v) : null)
+                .HasMaxLength(11);
             entity.Property(s => s.Email).HasMaxLength(200);
             entity.Property(s => s.StudentId).HasMaxLength(50);
             entity.Property(s => s.ProgramName).HasMaxLength(200);
@@ -105,7 +110,11 @@ public class UniversityDbContext : IdentityDbContext<AppUser, AppRole, string>
         {
             entity.Property(l => l.FirstName).HasMaxLength(100);
             entity.Property(l => l.LastName).HasMaxLength(100);
-            entity.Property(l => l.NationalId).HasMaxLength(11);
+            entity.Property(l => l.NationalId)
+                .HasConversion(
+                    v => v != null ? v.Value : null,
+                    v => v != null ? new PESEL(v) : null)
+                .HasMaxLength(11);
             entity.Property(l => l.Email).HasMaxLength(200);
             entity.Property(l => l.Title).HasMaxLength(50);
             entity.Property(l => l.Faculty).HasMaxLength(100);
@@ -234,7 +243,7 @@ public class UniversityDbContext : IdentityDbContext<AppUser, AppRole, string>
                 Id = StudentAdamId,
                 FirstName = "Adam",
                 LastName = "Nowak",
-                NationalId = "99010112345",
+                NationalId = new PESEL("99010112342"),
                 Email = "adam.nowak@example.com",
                 StudentId = "S001",
                 ProgramName = "Informatyka",
@@ -246,7 +255,7 @@ public class UniversityDbContext : IdentityDbContext<AppUser, AppRole, string>
                 Id = StudentEwaId,
                 FirstName = "Ewa",
                 LastName = "Kowalska",
-                NationalId = "98020254321",
+                NationalId = new PESEL("98020254323"),
                 Email = "ewa.kowalska@example.com",
                 StudentId = "S002",
                 ProgramName = "Matematyka",
@@ -292,7 +301,7 @@ public class UniversityDbContext : IdentityDbContext<AppUser, AppRole, string>
                 Id = LecturerNowakId,
                 FirstName = "Jan",
                 LastName = "Nowak",
-                NationalId = "75010112345",
+                NationalId = new PESEL("75010112346"),
                 Email = "jan.nowak@wsei.edu.pl",
                 Title = "dr inż.",
                 Faculty = "Informatyka"
@@ -302,7 +311,7 @@ public class UniversityDbContext : IdentityDbContext<AppUser, AppRole, string>
                 Id = LecturerKowalskaId,
                 FirstName = "Anna",
                 LastName = "Kowalska",
-                NationalId = "78020254321",
+                NationalId = new PESEL("78020254325"),
                 Email = "anna.kowalska@wsei.edu.pl",
                 Title = "mgr",
                 Faculty = "Matematyka"

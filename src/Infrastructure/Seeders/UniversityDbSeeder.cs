@@ -1,5 +1,6 @@
 using CoreApp.Domain.Entities;
 using CoreApp.Domain.Enums;
+using CoreApp.Domain.ValueObjects;
 using Infrastructure.EntityFramework.Context;
 using Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,7 @@ public class UniversityDbSeeder(UniversityDbContext context) : IDataSeeder
                     Id = UniversityDbContext.StudentAdamId,
                     FirstName = "Adam",
                     LastName = "Nowak",
-                    NationalId = "99010112345",
+                    NationalId = new PESEL("99010112342"),
                     Email = "adam.nowak@example.com",
                     StudentId = "S001",
                     ProgramName = "Informatyka",
@@ -32,7 +33,7 @@ public class UniversityDbSeeder(UniversityDbContext context) : IDataSeeder
                     Id = UniversityDbContext.StudentEwaId,
                     FirstName = "Ewa",
                     LastName = "Kowalska",
-                    NationalId = "98020254321",
+                    NationalId = new PESEL("98020254323"),
                     Email = "ewa.kowalska@example.com",
                     StudentId = "S002",
                     ProgramName = "Matematyka",
@@ -79,7 +80,7 @@ public class UniversityDbSeeder(UniversityDbContext context) : IDataSeeder
                     Id = UniversityDbContext.LecturerNowakId,
                     FirstName = "Jan",
                     LastName = "Nowak",
-                    NationalId = "75010112345",
+                    NationalId = new PESEL("75010112346"),
                     Email = "jan.nowak@wsei.edu.pl",
                     Title = "dr inż.",
                     Faculty = "Informatyka"
@@ -89,7 +90,7 @@ public class UniversityDbSeeder(UniversityDbContext context) : IDataSeeder
                     Id = UniversityDbContext.LecturerKowalskaId,
                     FirstName = "Anna",
                     LastName = "Kowalska",
-                    NationalId = "78020254321",
+                    NationalId = new PESEL("78020254325"),
                     Email = "anna.kowalska@wsei.edu.pl",
                     Title = "mgr",
                     Faculty = "Matematyka"
