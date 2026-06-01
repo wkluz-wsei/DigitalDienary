@@ -12,6 +12,7 @@ using Infrastructure.Seeders;
 using Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +34,9 @@ public static class InfrastructureModule
         services.AddScoped<IGradeRepository, EfGradeRepository>();
         services.AddScoped<IUniversityUnitOfWork, EfUniversityUnitOfWork>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+        services.AddHttpContextAccessor();
+
         services.AddScoped<IDataSeeder, IdentityDbSeeder>();
         services.AddScoped<IDataSeeder, UniversityDbSeeder>();
 
@@ -40,17 +44,38 @@ public static class InfrastructureModule
             options.UseSqlite(configuration.GetConnectionString("UniversityDb")));
 
         services.AddIdentity<AppUser, AppRole>(options =>
+        {
+            options.Password.RequiredLength = 8;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.User.RequireUniqueEmail = true;
+            options.SignIn.RequireConfirmedEmail = true;
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+        })
+        .AddEntityFrameworkStores<UniversityDbContext>()
+        .AddDefaultTokenProviders();
+
+        services.ConfigureApplicationCookie(options =>
+        {
+            options.Events.OnRedirectToLogin = context =>
             {
-                options.Password.RequiredLength = 8;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.User.RequireUniqueEmail = true;
-                options.SignIn.RequireConfirmedEmail = true;
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
-            })
-            .AddEntityFrameworkStores<UniversityDbContext>()
-            .AddDefaultTokenProviders();
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return Task.CompletedTask;
+            };
+
+            options.Events.OnRedirectToAccessDenied = context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                return Task.CompletedTask;
+            };
+
+            options.Events.OnRedirectToLogout = context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status200OK;
+                return Task.CompletedTask;
+            };
+        });
 
         return services;
     }
@@ -75,6 +100,7 @@ public static class InfrastructureModule
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(options =>
             {
@@ -88,6 +114,17 @@ public static class InfrastructureModule
                     ValidAudience = jwtOptions.Audience,
                     IssuerSigningKey = jwtOptions.GetSymmetricKey(),
                     ClockSkew = TimeSpan.Zero
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
@@ -103,7 +140,10 @@ public static class InfrastructureModule
                 policy.RequireRole(UserRole.Administrator.ToString(), UserRole.DeanOfficeStaff.ToString()));
 
             options.AddPolicy(AppPolicies.LecturerOrAdmin.Name(), policy =>
-                policy.RequireRole(UserRole.Administrator.ToString(), UserRole.Lecturer.ToString()));
+                policy.RequireRole(
+                    UserRole.Administrator.ToString(),
+                    UserRole.DeanOfficeStaff.ToString(),
+                    UserRole.Lecturer.ToString()));
 
             options.AddPolicy(AppPolicies.ActiveUser.Name(), policy =>
                 policy
@@ -114,12 +154,11 @@ public static class InfrastructureModule
                 policy.RequireClaim("department", "Sales"));
 
             options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
                 .RequireAuthenticatedUser()
                 .Build();
 
-            options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .Build();
+            options.FallbackPolicy = null;
         });
 
         return services;

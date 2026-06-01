@@ -38,6 +38,21 @@ ScaffoldingReadMe.txt
 
 # dotenv environment variables file
 .env
+.env.*
+
+# Local configuration and secrets
+appsettings.Development.json
+appsettings.Local.json
+
+# SQLite databases and journal files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# IDE user-specific settings
+*.DotSettings.user
 
 # Others
 ~$*

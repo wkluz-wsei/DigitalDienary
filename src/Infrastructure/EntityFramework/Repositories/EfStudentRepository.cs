@@ -18,6 +18,8 @@ public class EfStudentRepository(UniversityDbContext context)
                 .ThenInclude(g => g.AcademicYear)
             .Include(s => s.Grades)
                 .ThenInclude(g => g.Instructor)
+            .Include(s => s.Grades)
+                .ThenInclude(g => g.History)
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 

@@ -3,6 +3,7 @@ using System;
 using Infrastructure.EntityFramework.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.EntityFramework.Migrations
 {
     [DbContext(typeof(UniversityDbContext))]
-    partial class UniversityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260528162045_AddPeselAndGradeHistory")]
+    partial class AddPeselAndGradeHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.8");
@@ -325,38 +328,6 @@ namespace Infrastructure.EntityFramework.Migrations
                         });
                 });
 
-            modelBuilder.Entity("CourseEnrollment", b =>
-                {
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("CourseId", "StudentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("CourseEnrollments", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            CourseId = new Guid("8e8f8f66-bb84-4f77-8a42-6052b8c64410"),
-                            StudentId = new Guid("3d54091d-abc8-49ec-9590-93ad3ed5458f")
-                        },
-                        new
-                        {
-                            CourseId = new Guid("1bcf84f4-57fa-4fb1-a655-bd8ee4d061d2"),
-                            StudentId = new Guid("3d54091d-abc8-49ec-9590-93ad3ed5458f")
-                        },
-                        new
-                        {
-                            CourseId = new Guid("1bcf84f4-57fa-4fb1-a655-bd8ee4d061d2"),
-                            StudentId = new Guid("7ba19ea5-3967-4b24-bb87-b14c9ee14770")
-                        });
-                });
-
             modelBuilder.Entity("Infrastructure.EntityFramework.Entities.AppRole", b =>
                 {
                     b.Property<string>("Id")
@@ -598,33 +569,6 @@ namespace Infrastructure.EntityFramework.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("LecturerCourse", b =>
-                {
-                    b.Property<Guid>("LecturerId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("LecturerId", "CourseId");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("LecturerCourses", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            LecturerId = new Guid("0d7c4923-0ed0-4db9-a392-4b3c520ef77e"),
-                            CourseId = new Guid("8e8f8f66-bb84-4f77-8a42-6052b8c64410")
-                        },
-                        new
-                        {
-                            LecturerId = new Guid("05f64714-3ac1-4327-8e02-fd519844126f"),
-                            CourseId = new Guid("1bcf84f4-57fa-4fb1-a655-bd8ee4d061d2")
-                        });
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -787,36 +731,6 @@ namespace Infrastructure.EntityFramework.Migrations
                         .IsRequired();
 
                     b.Navigation("Grade");
-                });
-
-            modelBuilder.Entity("CourseEnrollment", b =>
-                {
-                    b.HasOne("CoreApp.Domain.Entities.Course", null)
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CoreApp.Domain.Entities.Student", null)
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("LecturerCourse", b =>
-                {
-                    b.HasOne("CoreApp.Domain.Entities.Course", null)
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CoreApp.Domain.Entities.Lecturer", null)
-                        .WithMany()
-                        .HasForeignKey("LecturerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

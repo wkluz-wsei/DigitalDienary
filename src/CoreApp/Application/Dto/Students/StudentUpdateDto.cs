@@ -1,5 +1,6 @@
 using CoreApp.Domain.Enums;
 using CoreApp.Domain.Entities;
+using CoreApp.Domain.ValueObjects;
 
 namespace CoreApp.Application.Dto.Students;
 
@@ -18,7 +19,7 @@ public sealed record StudentUpdateDto
     {
         student.FirstName = FirstName;
         student.LastName = LastName;
-        student.NationalId = NationalId;
+        student.NationalId = new PESEL(NationalId);
         student.Email = Email;
         student.StudentId = StudentId;
         student.ProgramName = ProgramName;

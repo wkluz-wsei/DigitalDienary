@@ -18,7 +18,7 @@ public sealed record StudentDetailDto : PersonDto
             Id = student.Id,
             FirstName = student.FirstName,
             LastName = student.LastName,
-            NationalId = student.NationalId,
+            NationalId = student.NationalId?.Value ?? string.Empty,
             Email = student.Email,
             StudentId = student.StudentId,
             ProgramName = student.ProgramName,

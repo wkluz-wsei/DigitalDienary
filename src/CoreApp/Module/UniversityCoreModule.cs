@@ -20,6 +20,7 @@ public static class UniversityCoreModule
         services.AddValidatorsFromAssemblyContaining<GradeUpdateDtoValidator>();
         services.AddFluentValidationAutoValidation();
         services.AddScoped<IStudentService, StudentService>();
+        services.AddScoped<ILecturerService, LecturerService>();
 
         return services;
     }

@@ -1,6 +1,7 @@
 using CoreApp.Application.Repositories;
 using CoreApp.Domain.Entities;
 using CoreApp.Domain.Enums;
+using CoreApp.Domain.ValueObjects;
 
 namespace Infrastructure.Memory;
 
@@ -16,7 +17,7 @@ public class MemoryStudentRepository : MemoryGenericRepository<Student>, IStuden
             Id = FirstStudentId,
             FirstName = "Adam",
             LastName = "Nowak",
-            NationalId = "99010112345",
+            NationalId = new PESEL("99010112342"),
             Email = "adam.nowak@example.com",
             StudentId = "S001",
             ProgramName = "Informatyka",
@@ -29,7 +30,7 @@ public class MemoryStudentRepository : MemoryGenericRepository<Student>, IStuden
             Id = SecondStudentId,
             FirstName = "Ewa",
             LastName = "Kowalska",
-            NationalId = "98020254321",
+            NationalId = new PESEL("98020254323"),
             Email = "ewa.kowalska@example.com",
             StudentId = "S002",
             ProgramName = "Matematyka",

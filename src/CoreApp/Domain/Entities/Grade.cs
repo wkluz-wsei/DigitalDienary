@@ -15,4 +15,6 @@ public class Grade : EntityBase
     public GradeValue GradeValue { get; set; }
 
     public Lecturer? Instructor { get; set; }
-}
+
+    public List<GradeHistory> History { get; set; } = new();
+    }
