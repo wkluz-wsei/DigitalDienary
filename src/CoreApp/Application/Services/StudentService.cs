@@ -2,13 +2,16 @@ using CoreApp.Application.Dto.Grades;
 using CoreApp.Application.Dto.Students;
 using CoreApp.Application.Exceptions;
 using CoreApp.Application.Paging;
+using CoreApp.Application.Security;
 using CoreApp.Application.UnitOfWork;
 using CoreApp.Domain.Entities;
 using CoreApp.Domain.Enums;
 
 namespace CoreApp.Application.Services;
 
-public class StudentService(IUniversityUnitOfWork unitOfWork) : IStudentService
+public class StudentService(
+    IUniversityUnitOfWork unitOfWork,
+    ICurrentUserContext currentUserContext) : IStudentService
 {
     public async Task<PagedResult<StudentSummaryDto>> FindAllStudentsPaged(int page, int size)
     {
@@ -110,7 +113,32 @@ public class StudentService(IUniversityUnitOfWork unitOfWork) : IStudentService
         var grade = student.Grades.FirstOrDefault(g => g.Id == gradeId)
             ?? throw new GradeNotFoundException($"Grade with id={gradeId} not found for student with id={studentId}!");
 
+        // Authorization check
+        var isDeanOffice = currentUserContext.IsInRole(UserRole.DeanOfficeStaff.ToString()) || 
+                          currentUserContext.IsInRole(UserRole.Administrator.ToString());
+        
+        if (!isDeanOffice && grade.Instructor?.Email != currentUserContext.UserName)
+        {
+            throw new UnauthorizedAccessException("You are not authorized to update this grade.");
+        }
+
+        var oldValue = grade.GradeValue;
         dto.UpdateEntity(grade);
+        var newValue = grade.GradeValue;
+
+        if (oldValue != newValue)
+        {
+            var history = new GradeHistory
+            {
+                Grade = grade,
+                OldValue = oldValue,
+                NewValue = newValue,
+                ChangedByUserId = currentUserContext.UserId ?? "Unknown",
+                ChangedByUserName = currentUserContext.UserName ?? "Unknown",
+                ActionType = "Updated"
+            };
+            grade.History.Add(history);
+        }
 
         await unitOfWork.Grades.UpdateAsync(grade);
         await unitOfWork.Students.UpdateAsync(student);
