@@ -89,8 +89,8 @@ public class UniversityDbContext : IdentityDbContext<AppUser, AppRole, string>
             entity.Property(s => s.LastName).HasMaxLength(100);
             entity.Property(s => s.NationalId)
                 .HasConversion(
-                    v => v != null ? v.Value : null,
-                    v => v != null ? new PESEL(v) : null)
+                    v => v.Value,
+                    v => new PESEL(v))
                 .HasMaxLength(11);
             entity.Property(s => s.Email).HasMaxLength(200);
             entity.Property(s => s.StudentId).HasMaxLength(50);
@@ -104,7 +104,18 @@ public class UniversityDbContext : IdentityDbContext<AppUser, AppRole, string>
             entity.Property(c => c.Name).HasMaxLength(200);
             entity.Property(c => c.CompletionType).HasConversion<string>();
             entity.Property(c => c.Semester).HasConversion<string>();
-            entity.Ignore(c => c.Enrollments);
+
+            entity.HasMany(c => c.Enrollments)
+                .WithMany()
+                .UsingEntity<Dictionary<string, object>>(
+                    "CourseEnrollment",
+                    right => right.HasOne<Student>().WithMany().HasForeignKey("StudentId").OnDelete(DeleteBehavior.Cascade),
+                    left => left.HasOne<Course>().WithMany().HasForeignKey("CourseId").OnDelete(DeleteBehavior.Cascade),
+                    join =>
+                    {
+                        join.HasKey("CourseId", "StudentId");
+                        join.ToTable("CourseEnrollments");
+                    });
         });
 
         builder.Entity<Lecturer>(entity =>
@@ -113,13 +124,24 @@ public class UniversityDbContext : IdentityDbContext<AppUser, AppRole, string>
             entity.Property(l => l.LastName).HasMaxLength(100);
             entity.Property(l => l.NationalId)
                 .HasConversion(
-                    v => v != null ? v.Value : null,
-                    v => v != null ? new PESEL(v) : null)
+                    v => v.Value,
+                    v => new PESEL(v))
                 .HasMaxLength(11);
             entity.Property(l => l.Email).HasMaxLength(200);
             entity.Property(l => l.Title).HasMaxLength(50);
             entity.Property(l => l.Faculty).HasMaxLength(100);
-            entity.Ignore(l => l.TaughtCourses);
+
+            entity.HasMany(l => l.TaughtCourses)
+                .WithMany()
+                .UsingEntity<Dictionary<string, object>>(
+                    "LecturerCourse",
+                    right => right.HasOne<Course>().WithMany().HasForeignKey("CourseId").OnDelete(DeleteBehavior.Cascade),
+                    left => left.HasOne<Lecturer>().WithMany().HasForeignKey("LecturerId").OnDelete(DeleteBehavior.Cascade),
+                    join =>
+                    {
+                        join.HasKey("LecturerId", "CourseId");
+                        join.ToTable("LecturerCourses");
+                    });
         });
 
         builder.Entity<AcademicYear>(entity =>
@@ -329,5 +351,14 @@ public class UniversityDbContext : IdentityDbContext<AppUser, AppRole, string>
             AcademicYearId = AcademicYear2025Id,
             InstructorId = LecturerNowakId
         });
+
+        builder.Entity("CourseEnrollment").HasData(
+            new { CourseId = CourseAlgorithmsId, StudentId = StudentAdamId },
+            new { CourseId = CourseDatabasesId, StudentId = StudentAdamId },
+            new { CourseId = CourseDatabasesId, StudentId = StudentEwaId });
+
+        builder.Entity("LecturerCourse").HasData(
+            new { LecturerId = LecturerNowakId, CourseId = CourseAlgorithmsId },
+            new { LecturerId = LecturerKowalskaId, CourseId = CourseDatabasesId });
     }
 }
